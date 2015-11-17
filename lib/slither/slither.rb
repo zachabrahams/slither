@@ -10,7 +10,7 @@ class Slither
   class LineWrongSizeError < StandardError; end
   class SectionsNotSameLengthError < StandardError; end
   class AddedSectionToSectionlessError < StandardError; end
-  class Slither::AddedColumnToSectionedError < StandardError; end
+  class AddedColumnToSectionedError < StandardError; end
 
 
   def self.define(name, options = {}, &block)
