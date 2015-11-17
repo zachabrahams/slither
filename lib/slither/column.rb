@@ -41,6 +41,7 @@ class Slither
             end
           else value.strip
         end
+      
       @block_formatter ? @block_formatter.call(coerced_value) : coerced_value
     rescue
       raise ParserError, "Error parsing column ''#{name}'. The value '#{value}' could not be converted to type #{@type}: #{$!}"

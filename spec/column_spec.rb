@@ -109,6 +109,7 @@ describe Slither::Column do
 
     it "should use a formatting block if available" do
       @column = Slither::Column.new(:name, 10, :type => :string) { |value| value.upcase }
+      puts @column.instance_variable_get(:@block_formatter)
       st = @column.parse('john smith')
       st.should be_a(String)
       st.should == 'JOHN SMITH'
