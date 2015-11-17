@@ -32,11 +32,11 @@ describe Slither::Generator do
   
   it "should raise an error if there is no data for a required section" do
     @data.delete :header
-    lambda {  @generator.generate(@data) }.should raise_error(Slither::RequiredSectionEmptyError, "Required section 'header' was empty.")
+    expect {  @generator.generate(@data) }.to raise_error(Slither::RequiredSectionEmptyError, "Required section 'header' was empty.")
   end
   
   it "should generate a string" do
     expected = "HEAD         1\n      Paul    Hewson\n      Dave     Evans\nFOOT         1"
-    @generator.generate(@data).should == expected
+    expect(@generator.generate(@data)).to eq(expected)
   end 
 end

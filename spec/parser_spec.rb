@@ -38,7 +38,7 @@ describe Slither::Parser do
         :footer => [ {:type => "FOOT", :file_id => "1" }]
       }      
       result = @parser.parse
-      result.should == expected
+      expect(result).to eq(expected)
     end
 
     it "should allow optional sections to be skipped" do
@@ -47,13 +47,13 @@ describe Slither::Parser do
       @io.string = '      Paul    Hewson'
 
       expected = { :body => [ {:first => "Paul", :last => "Hewson" } ] }
-      @parser.parse.should == expected      
+      expect(@parser.parse).to eq(expected)      
     end
       
     it "should raise an error if a required section is not found" do
       @io.string = '      Ryan      Wood'
 
-      lambda { @parser.parse }.should raise_error(Slither::RequiredSectionNotFoundError, "Required section 'header' was not found.")
+      expect { @parser.parse }.to raise_error(Slither::RequiredSectionNotFoundError, "Required section 'header' was not found.")
     end
     
     it "should raise an error if the line is too long" do
@@ -61,7 +61,7 @@ describe Slither::Parser do
       @definition.sections[2].optional = true
       @io.string = 'abc'*20
       
-      lambda { @parser.parse }.should raise_error(Slither::LineWrongSizeError)
+      expect { @parser.parse }.to raise_error(Slither::LineWrongSizeError)
     end
     
     it "should raise an error if the line is too short" do
@@ -69,7 +69,7 @@ describe Slither::Parser do
       @definition.sections[2].optional = true
       @io.string = 'abc'
 
-      lambda { @parser.parse }.should raise_error(Slither::LineWrongSizeError)
+      expect { @parser.parse }.to raise_error(Slither::LineWrongSizeError)
     end
     
   end
@@ -91,19 +91,19 @@ describe Slither::Parser do
     it 'should raise error for data with line length too long' do
       @io.string = "abcdefghijklmnop"
 
-      lambda { @parser.parse_by_bytes }.should raise_error(Slither::LineWrongSizeError)
+      expect { @parser.parse_by_bytes }.to raise_error(Slither::LineWrongSizeError)
     end
     
     it 'should raise error for data with line length too short' do
       @io.string = "abc"
 
-      lambda { @parser.parse_by_bytes }.should raise_error(Slither::LineWrongSizeError)
+      expect { @parser.parse_by_bytes }.to raise_error(Slither::LineWrongSizeError)
     end
     
     it 'should raise error for data with empty lines' do
       @io.string = "abcdefghij\r\n\n\n\n"  # 10 then 3
 
-      lambda { @parser.parse_by_bytes }.should raise_error(Slither::LineWrongSizeError)
+      expect { @parser.parse_by_bytes }.to raise_error(Slither::LineWrongSizeError)
     end
     
     it 'should handle utf characters' do
@@ -115,7 +115,7 @@ describe Slither::Parser do
         :body => [ {:first => utf_str1, :last => utf_str2} ]
       }
       
-      Slither.parseIo(@io, :test).should eq(expected)
+      expect(Slither.parseIo(@io, :test)).to eq(expected)
     end
     
     it 'should handle mid-line newline chars' do
@@ -127,7 +127,7 @@ describe Slither::Parser do
         :body => [ {:first => str1, :last => str2}, {:first => str1, :last => str2} ]
       }
       
-      Slither.parseIo(@io, :test).should eq(expected)
+      expect(Slither.parseIo(@io, :test)).to eq(expected)
     end
     
     it 'should throw exception if section lengths are different' do
@@ -142,7 +142,7 @@ describe Slither::Parser do
       
       parser = Slither::Parser.new(definition, @io)
       
-      lambda { parser.parse_by_bytes }.should raise_error(Slither::SectionsNotSameLengthError)
+      expect { parser.parse_by_bytes }.to raise_error(Slither::SectionsNotSameLengthError)
     end
   end
   
@@ -152,16 +152,16 @@ describe Slither::Parser do
       @io = StringIO.new 
       @parser = Slither::Parser.new(@definition, @io)
       
-      @parser.send(:remove_newlines!).should eq(true)
+      expect(@parser.send(:remove_newlines!)).to eq(true)
       
       @io.string = "\nXYZ"
-      @parser.send(:remove_newlines!).should eq(true)
+      expect(@parser.send(:remove_newlines!)).to eq(true)
       @io.string = "\r\n"
-      @parser.send(:remove_newlines!).should eq(true)
+      expect(@parser.send(:remove_newlines!)).to eq(true)
       @io.string = "\n\n\n\nXYZ\n"
-      @parser.send(:remove_newlines!).should eq(true)
+      expect(@parser.send(:remove_newlines!)).to eq(true)
       @io.string = ""
-      @parser.send(:remove_newlines!).should eq(true)
+      expect(@parser.send(:remove_newlines!)).to eq(true)
       
     end
     
@@ -170,11 +170,11 @@ describe Slither::Parser do
       @parser = Slither::Parser.new(@definition, @io)
       
       @io.string = "XYZ\nxyz"
-      @parser.send(:remove_newlines!).should eq(false)
+      expect(@parser.send(:remove_newlines!)).to eq(false)
       @io.string = " \nxyz"
-      @parser.send(:remove_newlines!).should eq(false)
+      expect(@parser.send(:remove_newlines!)).to eq(false)
       @io.string = "!YZxyz\n"
-      @parser.send(:remove_newlines!).should eq(false)
+      expect(@parser.send(:remove_newlines!)).to eq(false)
       
     end
     
@@ -183,19 +183,19 @@ describe Slither::Parser do
       @parser = Slither::Parser.new(@definition, @io)
       
       @io.string = "\nXYZ"
-      @parser.send(:remove_newlines!).should eq(true)
-      @io.getc.should eq("X")
-      @parser.send(:remove_newlines!).should eq(false)
+      expect(@parser.send(:remove_newlines!)).to eq(true)
+      expect(@io.getc).to eq("X")
+      expect(@parser.send(:remove_newlines!)).to eq(false)
     end
     
     it 'newline? it is true for \n or \r and false otherwise' do
       @parser = Slither::Parser.new(nil,nil)
       
       [["\n",true],["\r",true],["n",false]].each do |el|
-        @parser.send(:newline?,el[0].ord).should eq(el[1])
+        expect(@parser.send(:newline?,el[0].ord)).to eq(el[1])
       end
-      @parser.send(:newline?,nil).should eq(false)
-      @parser.send(:newline?,"").should eq(false)
+      expect(@parser.send(:newline?,nil)).to eq(false)
+      expect(@parser.send(:newline?,"")).to eq(false)
     end
     
   end
