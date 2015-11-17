@@ -40,6 +40,10 @@ class Slither
       col
     end
 
+    def spacer(length)
+      column(:spacer, length)
+    end
+
     def parse(line)
       line_data = line.unpack(unpacker)
       row = {}

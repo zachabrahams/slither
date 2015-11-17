@@ -73,7 +73,7 @@ class Slither
           parsed << @definition.parse(line)
         end
 
-         parsed 
+         parsed
       end
 
       def fill_content(line, section, parsed)
@@ -84,7 +84,7 @@ class Slither
 
       def validate_sectionless_length(line)
         if line.length != @definition.length
-          raise Slither::LineWrongSizeError, "Line wrong size: (#{line.length} when it should be #{@definition.length}. #{parsed_line})"
+          raise Slither::LineWrongSizeError, "Line wrong size: (#{line.length} when it should be #{@definition.length}. #{line})"
         end
       end
 
