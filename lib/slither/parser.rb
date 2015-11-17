@@ -9,7 +9,25 @@ class Slither
     end
 
     def parse()
-      @definition.options[:sectionless] ? sectionless_parse : sectioned_parse
+      parsed = {}
+
+      @file.each_line do |line|
+        line.chomp! if line
+        next if line.empty?
+        @definition.sections.each do |section|
+          if section.match(line)
+            validate_length(line, section)
+            parsed = fill_content(line, section, parsed)
+          end
+        end
+      end
+
+      @definition.sections.each do |section|
+        raise(Slither::RequiredSectionNotFoundError, "Required section '#{section.name}' was not found.") unless parsed[section.name] || section.optional
+      end
+
+      parsed = parsed[:sectionless] if @definition.options[:sectionless]
+      parsed
     end
 
     def parse_by_bytes
@@ -39,53 +57,17 @@ class Slither
       @definition.sections.each do |section|
         raise(Slither::RequiredSectionNotFoundError, "Required section '#{section.name}' was not found.") unless parsed[section.name] || section.optional
       end
+
+      parsed = parsed[:sectionless] if @definition.options[:sectionless]
       parsed
     end
 
     private
 
-      def sectioned_parse
-        parsed = {}
-
-        @file.each_line do |line|
-          line.chomp! if line
-          next if line.empty?
-          @definition.sections.each do |section|
-            if section.match(line)
-              validate_length(line, section)
-              parsed = fill_content(line, section, parsed)
-            end
-          end
-        end
-
-        @definition.sections.each do |section|
-          raise(Slither::RequiredSectionNotFoundError, "Required section '#{section.name}' was not found.") unless parsed[section.name] || section.optional
-        end
-        parsed
-      end
-
-      def sectionless_parse
-        parsed = []
-        @file.each_line do |line|
-          line.chomp! if line
-          next if line.empty?
-          validate_sectionless_length(line)
-          parsed << @definition.parse(line)
-        end
-
-         parsed
-      end
-
       def fill_content(line, section, parsed)
         parsed[section.name] ||= []
         parsed[section.name] << section.parse(line)
         parsed
-      end
-
-      def validate_sectionless_length(line)
-        if line.length != @definition.length
-          raise Slither::LineWrongSizeError, "Line wrong size: (#{line.length} when it should be #{@definition.length}. #{line})"
-        end
       end
 
       def validate_length(line, section)
