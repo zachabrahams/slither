@@ -1,20 +1,20 @@
 require File.join(File.dirname(__FILE__), 'spec_helper')
 
-describe Slither::Definition do  
+describe Slither::Definition do
   before(:each) do
   end
-  
+
   describe "when specifying alignment" do
     it "should have an alignment option" do
       d = Slither::Definition.new :align => :right
       expect(d.options[:align]).to eq(:right)
     end
-    
+
     it "should default to being right aligned" do
       d = Slither::Definition.new
       expect(d.options[:align]).to eq(:right)
     end
-  
+
     it "should override the default if :align is passed to the section" do
       d = Slither::Definition.new
       expect(d.options[:align]).to eq(:right)
@@ -24,13 +24,13 @@ describe Slither::Definition do
       expect(section.options[:align]).to eq(:left)
     end
   end
-  
+
   describe "when creating a section" do
     before(:each) do
       @d = Slither::Definition.new
       @section = double('section').as_null_object
     end
-    
+
     it "should create and yield a new section object" do
       yielded = nil
       @d.section :header do |section|
@@ -39,33 +39,63 @@ describe Slither::Definition do
       expect(yielded).to be_a(Slither::Section)
       expect(@d.sections.first).to eq(yielded)
     end
-          
+
     it "should magically build a section from an unknown method" do
       expect(Slither::Section).to receive(:new).with(:header, anything()).and_return(@section)
       @d.header {}
     end
-    
+
     it "should not create duplicate section names" do
       expect { @d.section(:header) {} }.not_to raise_error
       expect { @d.section(:header) {} }.to raise_error(ArgumentError, "Reserved or duplicate section name: 'header'")
     end
-    
+
     it "should throw an error if a reserved section name is used" do
       expect { @d.section(:spacer) {} }.to raise_error(ArgumentError, "Reserved or duplicate section name: 'spacer'")
     end
   end
-  
+
+  describe "when defaulting to sectioned" do
+    before(:each) do
+      @with_sections = Slither::Definition.new
+      @section = double('section').as_null_object
+      @column = double('column').as_null_object
+    end
+
+    it "should default to sectioned" do
+      expect(@with_sections.options[:sectionless]).to eq false
+    end
+
+    it "should raise an execption when adding a column to the definition" do
+        expect{ @with_sections.column(:first, 10) }.to raise_error(Slither::AddedColumnToSectionedError)
+    end
+
+  end
+
+  describe "when specifying sectionlessness" do
+    before(:each) do
+      @without_sections = Slither::Definition.new(sectionless: true)
+      @section = double('section').as_null_object
+    end
+
+
+    it "should raise an exception when adding a section" do
+      expect{ @without_sections.section(:header) {} }.to raise_error(Slither::AddedSectionToSectionlessError)
+    end
+
+  end
+
   describe "when creating a template" do
     before(:each) do
       @d = Slither::Definition.new
       @section = double('section').as_null_object
     end
-    
+
     it "should create a new section" do
       expect(Slither::Section).to receive(:new).with(:row, anything()).and_return(@section)
       @d.template(:row) {}
     end
-    
+
     it "should yield the new section" do
       expect(Slither::Section).to receive(:new).with(:row, anything()).and_return(@section)
       yielded = nil
@@ -74,7 +104,7 @@ describe Slither::Definition do
       end
       expect(yielded).to eq(@section)
     end
-    
+
     it "add a section to the templates collection" do
       expect(@d.templates.size).to eq(0)
       @d.template :row do |t|
